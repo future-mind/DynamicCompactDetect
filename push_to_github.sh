@@ -54,10 +54,85 @@ if [ ! -f "$token_file" ]; then
     chmod 600 "$token_file"
 fi
 
-# Push to GitHub
-echo "Pushing to GitHub..."
-echo "You may be prompted for your GitHub username and password or token."
-git push -u origin main || git push -u origin master
+# Check if the remote repository already exists and has content
+echo "Checking remote repository..."
+if git ls-remote --exit-code origin &>/dev/null; then
+    echo "Remote repository exists. Attempting to integrate remote changes..."
+    
+    # Fetch remote content
+    git fetch origin
+    
+    # Check if remote has a main branch
+    if git ls-remote --exit-code origin main &>/dev/null; then
+        remote_branch="main"
+    elif git ls-remote --exit-code origin master &>/dev/null; then
+        remote_branch="master"
+    else
+        remote_branch=""
+    fi
+    
+    if [ -n "$remote_branch" ]; then
+        echo "Remote has a '$remote_branch' branch."
+        
+        # Offer options to the user
+        echo "The remote repository already has content. You have several options:"
+        echo "1. Merge remote changes with your local changes (recommended)"
+        echo "2. Force push your changes (will overwrite remote history)"
+        echo "3. Create a new branch for your changes"
+        echo "4. Abort push operation"
+        
+        read -p "Select an option (1-4): " merge_option
+        
+        case $merge_option in
+            1)
+                echo "Attempting to merge remote changes..."
+                # Pull with --allow-unrelated-histories to merge unrelated repositories
+                git pull origin $remote_branch --allow-unrelated-histories
+                
+                # Check if there were merge conflicts
+                if [ $? -ne 0 ]; then
+                    echo "Merge conflicts detected. Please resolve them manually and then push."
+                    exit 1
+                fi
+                
+                # Push the merged result
+                git push -u origin $remote_branch
+                ;;
+            2)
+                echo "Force pushing your changes to $remote_branch..."
+                read -p "Are you sure? This will OVERWRITE remote history! (y/n): " confirm
+                if [ "$confirm" = "y" ]; then
+                    git push -f -u origin $remote_branch
+                else
+                    echo "Force push canceled."
+                    exit 1
+                fi
+                ;;
+            3)
+                read -p "Enter name for new branch: " new_branch
+                echo "Creating new branch '$new_branch'..."
+                git checkout -b $new_branch
+                git push -u origin $new_branch
+                ;;
+            4)
+                echo "Push operation aborted."
+                exit 0
+                ;;
+            *)
+                echo "Invalid option selected. Push operation aborted."
+                exit 1
+                ;;
+        esac
+    else
+        echo "Remote repository exists but doesn't have main or master branch."
+        echo "Attempting to push to main branch..."
+        git push -u origin main
+    fi
+else
+    echo "Remote repository appears to be empty. Pushing to main branch..."
+    # Push to GitHub (try main branch first, fall back to master if necessary)
+    git push -u origin main || git push -u origin master
+fi
 
 echo "Repository push complete!"
 echo "Your project is now available at: https://github.com/$github_username/DynamicCompactDetect" 
