@@ -1,0 +1,56 @@
+# DynamicCompact-S Model Configuration
+nc: 80  # number of classes (MS COCO)
+
+# Model scaling parameters
+scales:
+  # [depth, width, max_channels]
+  s: [0.33, 0.50, 1024]  # Small model variant
+
+# Anchors definition
+anchors:
+  # [width, height] pairs in relative format, normalized to 1
+  - [10,13, 16,30, 33,23]  # P3/8
+  - [30,61, 62,45, 59,119]  # P4/16
+  - [116,90, 156,198, 373,326]  # P5/32
+
+# Backbone architecture (based on YOLOv10 with modifications)
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]]  # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]]  # 1-P2/4
+  - [-1, 3, C2f, [128, True]]
+  - [-1, 1, Conv, [256, 3, 2]]  # 3-P3/8
+  - [-1, 6, C2f, [256, True]]
+  - [-1, 1, SCDown, [512, 3, 2]]  # 5-P4/16
+  - [-1, 6, C2f, [512, True]]
+  - [-1, 1, SCDown, [1024, 3, 2]]  # 7-P5/32
+  - [-1, 3, C2fCIB, [1024, True, True]]
+  - [-1, 1, SPPF, [1024, 5]]  # 9
+  # Added Dynamic Sparse Attention module
+  - [-1, 1, DynamicSparseAttention, [1024]]  # 10
+
+# Neck with transformer components
+neck:
+  # Lightweight transformer block
+  - [-1, 1, LightweightTransformer, [1024, 8, 128]]  # 11: Transformer with 8 heads, dim=128
+
+# Head 
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 6], 1, Concat, [1]]  # cat backbone P4
+  - [-1, 3, C2f, [512]]  # 14
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 4], 1, Concat, [1]]  # cat backbone P3
+  - [-1, 3, C2f, [256]]  # 17 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 14], 1, Concat, [1]]  # cat head P4
+  - [-1, 3, C2f, [512]]  # 20 (P4/16-medium)
+
+  - [-1, 1, SCDown, [512, 3, 2]]
+  - [[-1, 11], 1, Concat, [1]]  # cat head P5
+  - [-1, 3, C2fCIB, [1024, True, True]]  # 23 (P5/32-large)
+
+  # Multi-scale detection with dynamic feature fusion
+  - [[17, 20, 23], 1, DynamicDetect, [nc]]  # 24: Dynamic Detection head 

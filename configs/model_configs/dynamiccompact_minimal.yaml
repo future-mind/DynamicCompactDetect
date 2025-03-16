@@ -1,0 +1,22 @@
+# Minimal DynamicCompact Model Configuration
+nc: 80  # number of classes (MS COCO)
+
+# Anchors definition (simplified format)
+anchors:
+  - [10, 13, 16, 30, 33, 23]  # P3/8 anchors
+
+# Extremely simple model structure
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [32, 3, 2]]  # 0
+  - [-1, 1, Conv, [64, 3, 2]]  # 1
+  - [-1, 1, Conv, [128, 3, 2]]  # 2
+  - [-1, 1, Conv, [256, 3, 2]]  # 3
+
+# The output from the model needs to be in the format expected by YOLOLoss
+# For a minimal model, we'll have just one detection layer (for a single scale)
+# The output should be [batch_size, num_anchors * (5 + num_classes), grid_h, grid_w]
+# For 3 anchors, 80 classes: 3 * (5 + 80) = 3 * 85 = 255 output channels
+head:
+  # Output convolution with num_anchors * (5 + num_classes) output channels
+  - [-1, 1, Conv, [255, 1, 1]]  # 4 - Detection head with 3 anchors, 80 classes 

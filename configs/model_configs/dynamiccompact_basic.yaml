@@ -1,0 +1,46 @@
+# Simplified DynamicCompact-Basic Model Configuration
+nc: 80  # number of classes (MS COCO)
+
+# Anchors definition (required parameter)
+anchors:
+  # [width, height] pairs in relative format, normalized to 1
+  - [10,13, 16,30, 33,23]  # P3/8
+  - [30,61, 62,45, 59,119]  # P4/16
+  - [116,90, 156,198, 373,326]  # P5/32
+
+# Basic model structure that uses only Conv and simple modules
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]]  # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]]  # 1-P2/4
+  - [-1, 1, Conv, [256, 3, 2]]  # 2-P3/8
+  - [-1, 1, Conv, [512, 3, 2]]  # 3-P4/16
+  - [-1, 1, Conv, [1024, 3, 2]]  # 4-P5/32
+  - [-1, 1, SPPF, [1024, 5]]  # 5-SPP
+
+# Basic neck
+neck:
+  - [-1, 1, Conv, [512, 1, 1]]  # 6-Reduce channels
+
+# Basic head
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]  # 7-Upsample
+  - [[-1, 3], 1, Concat, [1]]  # 8-Concat with P4
+  - [-1, 1, Conv, [512, 3, 1]]  # 9-Conv
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]  # 10-Upsample
+  - [[-1, 2], 1, Concat, [1]]  # 11-Concat with P3
+  - [-1, 1, Conv, [256, 3, 1]]  # 12-Conv P3 (small objects)
+
+  - [-1, 1, Conv, [256, 3, 2]]  # 13-Downsample
+  - [[-1, 9], 1, Concat, [1]]  # 14-Concat with P4 features
+  - [-1, 1, Conv, [512, 3, 1]]  # 15-Conv P4 (medium objects)
+
+  - [-1, 1, Conv, [512, 3, 2]]  # 16-Downsample
+  - [[-1, 6], 1, Concat, [1]]  # 17-Concat with P5 features
+  - [-1, 1, Conv, [1024, 3, 1]]  # 18-Conv P5 (large objects)
+
+  # Simple detection heads for each scale
+  - [12, 1, Conv, [255, 1, 1]]  # 19-Detect P3 (small objects)
+  - [15, 1, Conv, [255, 1, 1]]  # 20-Detect P4 (medium objects)
+  - [18, 1, Conv, [255, 1, 1]]  # 21-Detect P5 (large objects) 
