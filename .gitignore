@@ -164,4 +164,10 @@ yolov*.pt
 !*/*/
 !*/*/.gitkeep
 !*/*/*/
-!*/*/*/.gitkeep 
+!*/*/*/.gitkeep
+
+# Allow benchmark and report files
+!results/benchmarks/
+!results/benchmarks/*.json
+!results/comparisons/
+!results/comparisons/*.md 
