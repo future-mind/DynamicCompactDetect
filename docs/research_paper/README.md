@@ -56,6 +56,8 @@ To generate the latest figures and data for the paper, run:
 
 This will execute benchmarks and create updated visualizations in the appropriate directories.
 
+Results generated using commit ID: 78fec1c1a1ea83fec088bb049fef867690296518
+
 ## Citation
 
 If you use DynamicCompactDetect in your research, please cite our work:
@@ -64,7 +66,8 @@ If you use DynamicCompactDetect in your research, please cite our work:
 @article{chadhar2024dynamiccompactdetect,
   title={DynamicCompactDetect: A Lightweight Object Detection Model for Edge Devices},
   author={Chadhar, Abhilash and Athya, Divya},
-  year={2024}
+  year={2024},
+  url={https://github.com/future-mind/dynamiccompactdetect}
 }
 ```
 

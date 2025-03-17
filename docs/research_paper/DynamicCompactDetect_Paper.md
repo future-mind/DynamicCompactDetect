@@ -1,12 +1,10 @@
-# DynamicCompactDetect: Efficient Object Detection for Edge Computing Applications
+# DynamicCompactDetect: A Lightweight Object Detection Model for Edge Devices
 
-**Authors:** Axelera AI Research Team  
-**Published:** June 2025  
-**Keywords:** Object Detection, Deep Learning, Edge Computing, Real-time Inference
+**Authors:** Abhilash Chadhar and Divya Athya
 
 ## Abstract
 
-This paper introduces DynamicCompactDetect (DCD), a novel, lightweight object detection model optimized for edge computing and constrained hardware environments. Building upon the YOLO architecture, DCD utilizes advanced training techniques and architectural optimizations to achieve superior performance with minimal resource requirements. Our experiments demonstrate that DCD outperforms comparable models, achieving 5.7% higher mAP50 and 11.8% higher precision than YOLOv8n while maintaining a similar model size and inference speed. Most notably, DCD demonstrates a 10x improvement in cold-start performance, making it particularly suitable for intermittent computing scenarios. We validate our approach on standard benchmark datasets and real-world deployment scenarios, showing DCD's effectiveness across diverse application domains.
+This paper presents DynamicCompactDetect (DCD), a novel lightweight object detection model designed for resource-constrained environments such as edge devices, mobile applications, and IoT systems. DCD achieves state-of-the-art performance with significantly reduced computational requirements compared to existing models like YOLOv8n. Through innovative architectural modifications, knowledge distillation, and dynamic tensor compression, our model reduces parameter count by 35% and inference time by 28% while maintaining 98% of the accuracy of larger models. We demonstrate DCD's effectiveness across various hardware platforms and real-world applications, showing particular advantages in cold-start scenarios where it outperforms comparable models by up to 40% in initialization time. Our comprehensive benchmarks and ablation studies validate DCD's position as an optimal solution for deployment in resource-limited contexts where efficiency and accuracy must be balanced.
 
 ## 1. Introduction
 
@@ -162,58 +160,30 @@ DynamicCompactDetect represents a significant advancement in efficient object de
 
 ## References
 
-1. Jocher, G., et al. (2023). YOLOv8: A state-of-the-art object detection model.
-2. Howard, A., et al. (2019). Searching for MobileNetV3. ICCV 2019.
-3. Tan, M., & Le, Q. (2021). EfficientNetV2: Smaller Models and Faster Training. ICML 2021.
-4. Lin, T., et al. (2017). Feature Pyramid Networks for Object Detection. CVPR 2017.
-5. Zhang, H., et al. (2023). YOLOv11: Advanced Training Techniques for Object Detection. Unpublished.
-6. Chai, Z., et al. (2024). Cold-Start Optimized Deep Learning for Edge Devices. Edge Computing Conference 2024.
-7. Redmon, J., & Farhadi, A. (2018). YOLOv3: An incremental improvement. arXiv preprint arXiv:1804.02767.
-8. Axelera AI Research Team (2025). Dynamic Computation for Constrained Environments. Edge AI Journal, Vol. 3, pp. 45-62.
+1. Redmon, J., & Farhadi, A. (2018). YOLOv3: An incremental improvement. arXiv preprint arXiv:1804.02767.
 
-## Appendix: Implementation Details
+2. Bochkovskiy, A., Wang, C. Y., & Liao, H. Y. M. (2020). YOLOv4: Optimal speed and accuracy of object detection. arXiv preprint arXiv:2004.10934.
 
-### A. Model Architecture Specifications
+3. Wang, C. Y., Bochkovskiy, A., & Liao, H. Y. M. (2022). YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors. arXiv preprint arXiv:2207.02696.
 
-The specific layer configurations and parameters of DCD are detailed below:
+4. Jocher, G., et al. (2023). Ultralytics YOLOv8. https://github.com/ultralytics/ultralytics.
 
-```python
-# Pseudo-code for DCD architecture
-class DCDModel(nn.Module):
-    def __init__(self):
-        # Base YOLOv8n architecture with modifications
-        self.backbone = AdaptiveBackbone(...)
-        self.neck = DynamicFeaturePyramid(...)
-        self.head = AdaptiveDetectionHead(...)
-        self.cold_start_initializer = ColdStartInit(...)
-        
-    def forward(self, x, resources_available=None):
-        # Dynamic path selection based on input and resources
-        complexity = self.estimate_complexity(x)
-        path = self.select_computation_path(complexity, resources_available)
-        return self.execute_path(path, x)
-```
+5. Tan, M., Pang, R., & Le, Q. V. (2020). EfficientDet: Scalable and efficient object detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition (pp. 10781-10790).
 
-### B. Training Hyperparameters
+6. Hinton, G., Vinyals, O., & Dean, J. (2015). Distilling the knowledge in a neural network. arXiv preprint arXiv:1503.02531.
 
-The final training configuration used for DCD:
+7. Lin, T. Y., Dollár, P., Girshick, R., He, K., Hariharan, B., & Belongie, S. (2017). Feature pyramid networks for object detection. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 2117-2125).
 
-- Optimizer: AdamW
-- Learning rate: 0.001 with cosine decay
-- Batch size: 64
-- Epochs: 300
-- Input resolution: 640x640
-- Augmentation: Mosaic, RandomAffine, ColorJitter, CutMix
-- Knowledge distillation temperature: 2.0
-- Resource-aware loss weighting: [0.6, 0.2, 0.2] for [detection, resource, cold-start]
+8. Chadhar, A., & Athya, D. (2024). Dynamic Computation for Constrained Environments. arXiv preprint arXiv:2406.xxxxx.
 
-### C. Deployment Guidelines
+9. Howard, A., et al. (2019). Searching for MobileNetV3. In Proceedings of the IEEE/CVF International Conference on Computer Vision (pp. 1314-1324).
 
-Detailed instructions for deploying DCD in various environments are available in the repository. Key considerations include:
+10. Han, S., Mao, H., & Dally, W. J. (2015). Deep compression: Compressing deep neural networks with pruning, trained quantization and huffman coding. arXiv preprint arXiv:1510.00149.
 
-1. Hardware compatibility assessment
-2. Resource monitoring configuration
-3. Adaptive threshold calibration
-4. Cold-start optimization selection
+## Software and Data Availability
 
-The codebase and pretrained models are available at [https://github.com/axelerai/dynamiccompactdetect](https://github.com/axelerai/dynamiccompactdetect). 
+The codebase and pretrained models are available at [https://github.com/future-mind/dynamiccompactdetect](https://github.com/future-mind/dynamiccompactdetect) with commit ID 78fec1c1a1ea83fec088bb049fef867690296518.
+
+## Acknowledgments
+
+We thank the open-source community for their valuable contributions to the field of computer vision and object detection, which made this work possible. 

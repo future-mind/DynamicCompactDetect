@@ -169,6 +169,8 @@ DynamicCompactDetect achieves:
 - Identical model size
 - 10x faster cold-start performance
 
+Results generated using commit ID: 78fec1c1a1ea83fec088bb049fef867690296518
+
 ## Research Paper
 
 A detailed research paper describing the DynamicCompactDetect model and its innovations is available in the `docs/research_paper` directory. The paper covers:
