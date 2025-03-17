@@ -1,8 +1,12 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -20,11 +24,68 @@ wheels/
 .installed.cfg
 *.egg
 
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
 # Virtual environments
 venv/
-ENV/
 env/
+ENV/
 .env/
+.venv/
+
+# IDE/Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.project
+.pydevproject
+.settings/
+
+# Project specific
+runs/
+**/old-*
+results/final/
+weights/*.pt
+!weights/.gitkeep
+
+# Large model files and datasets
+*.pt
+!models/
+
+# Allow specific model files that need to be in version control
+!models/dynamiccompactdetect_finetuned.pt
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Model weights and checkpoints
 *.pt
@@ -66,7 +127,6 @@ datasets/
 *.npz
 
 # Training outputs
-runs/
 results/
 logs/
 *.log
@@ -76,18 +136,7 @@ logs/
 *.yml
 events.out.tfevents.*
 
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
 # IDE specific
-.idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -108,4 +157,11 @@ yolov*.pt
 !data/hyp.yaml
 !data/hyp_v11.yaml
 !data/coco8.yaml
-!data/coco.yaml 
+!data/coco.yaml
+!.gitkeep
+!*/
+!*/.gitkeep
+!*/*/
+!*/*/.gitkeep
+!*/*/*/
+!*/*/*/.gitkeep 

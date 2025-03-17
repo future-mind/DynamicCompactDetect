@@ -1,0 +1,1 @@
+"""DynamicCompactDetect - A lightweight object detection model.""" 

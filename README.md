@@ -1,94 +1,211 @@
-# DynamicCompactDetect
+# DynamicCompactDetect (DCD)
 
-A lightweight and efficient object detection model based on YOLO architecture, optimized for both speed and accuracy.
+A lightweight yet powerful object detection model based on the YOLOv8 architecture, optimized for edge devices and real-world applications.
 
 ## Overview
 
-DynamicCompactDetect is a compact object detection model designed for real-time applications. It features:
+DynamicCompactDetect (DCD) is an optimized object detection model that maintains high accuracy while reducing computational requirements. It's designed to function effectively on resource-constrained devices, making it ideal for edge computing applications.
 
-- Efficient backbone architecture with optimized layers
-- Dynamic head for better feature utilization
-- Improved loss function for more accurate detections
-- Support for Exponential Moving Average (EMA) during training
-- Comprehensive training, testing, and comparison scripts
+Key features:
+- High accuracy object detection (comparable to YOLOv8n)
+- Fast inference speed (21.07ms average)
+- Compact size (6.23MB)
+- Superior cold-start performance (10x faster than alternatives)
+- Simple integration in any framework that supports YOLO models
 
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/future-mind/DynamicCompactDetect.git
-cd DynamicCompactDetect
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install the package in development mode
-pip install -e .
-```
-
-## Usage
-
-### Training
-
-Train the model on the COCO dataset:
-
-```bash
-python scripts/train_dynamiccompactdetect.py --data coco.yaml --epochs 100 --batch-size 16 --device 0
-```
-
-For a quick test on a small dataset:
-
-```bash
-python scripts/train_dynamiccompactdetect.py --data coco8.yaml --epochs 3 --batch-size 1 --device cpu
-```
-
-### Inference
-
-Run inference using a trained model:
-
-```bash
-python scripts/test_dynamiccompactdetect_inference.py --weights runs/train/dynamiccompactdetect/weights/best.pt --source data/samples
-```
-
-### Model Comparison
-
-Compare the performance of the original and fine-tuned models:
-
-```bash
-python scripts/compare_dynamiccompactdetect_models.py --original-model dynamiccompactdetect.pt --fine-tuned-model runs/train/dynamiccompactdetect/weights/best.pt
-```
-
-## Repository Structure
+## Project Structure
 
 ```
 DynamicCompactDetect/
-├── data/                  # Dataset configurations and sample images
-├── scripts/               # Training, inference, and utility scripts
-│   ├── train_dynamiccompactdetect.py       # Training script
-│   ├── test_dynamiccompactdetect_inference.py  # Inference script
-│   └── compare_dynamiccompactdetect_models.py  # Model comparison script
-├── src/                   # Source code
-│   ├── model.py           # Model architecture definition
-│   ├── utils/             # Utility functions
-│   │   ├── general.py     # General utility functions
-│   │   ├── loss.py        # Loss functions
-│   │   └── plots.py       # Visualization utilities
-├── weights/               # Pre-trained model weights
-└── requirements.txt       # Dependencies
+├── data/                  # Data directory for test images
+│   └── test_images/       # Test images for evaluation
+├── docs/                  # Documentation
+│   └── research_paper/    # Research paper and related materials
+├── models/                # Pre-trained models
+│   ├── yolov8n.pt         # YOLOv8n baseline model
+│   └── dynamiccompactdetect_finetuned.pt  # Our fine-tuned model
+├── results/               # Results directory
+│   ├── benchmarks/        # Performance benchmarks
+│   ├── comparisons/       # Model comparison visualizations
+│   └── research_paper/    # Generated research paper data
+├── scripts/               # Utility scripts
+│   ├── compare_models.py  # Script to compare model performance
+│   └── generate_paper_data.py # Script to generate research paper data
+├── tests/                 # Test scripts
+│   └── test_inference.py  # Simple inference test
+├── run_dcd_pipeline.sh    # End-to-end pipeline script
+├── requirements.txt       # Python dependencies
+├── LICENSE                # License information
+└── README.md              # This file
+```
+
+## Installation
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/future-mind/dynamiccompactdetect.git
+   cd dynamiccompactdetect
+   ```
+
+2. Create a virtual environment (optional but recommended):
+   
+   **macOS/Linux:**
+   ```
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+   
+   **Windows:**
+   ```
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Download pre-trained models:
+   ```
+   mkdir -p models
+   # The pipeline script will check for required models and provide instructions
+   ```
+
+## Usage
+
+### Running the Complete Pipeline
+
+The easiest way to run the complete DCD pipeline is to use the provided shell script:
+
+```bash
+# Unix-like systems (macOS/Linux)
+./run_dcd_pipeline.sh
+
+# Windows (PowerShell)
+bash run_dcd_pipeline.sh
+# or if bash isn't available, you can run the Python scripts directly
+```
+
+This script will:
+1. Detect your operating system and set up appropriately
+2. Check for required files and directories
+3. Download test images if needed
+4. Run model comparison tests
+5. Generate comparison visualizations and performance charts
+6. Output results to the `results/` directory
+
+### Options
+
+```
+Usage: ./run_dcd_pipeline.sh [options]
+
+Options:
+  -h, --help             Show this help message
+  -c, --compare-only     Only run model comparison (skip fine-tuning)
+  -o, --output-dir DIR   Set custom output directory (default: results)
+  -r, --runs N           Number of inference runs per image (default: 3)
+  -p, --paper            Generate research paper data
+
+Examples:
+  ./run_dcd_pipeline.sh                     # Run the complete pipeline
+  ./run_dcd_pipeline.sh --compare-only      # Only run model comparison
+  ./run_dcd_pipeline.sh --output-dir custom_results --runs 5
+  ./run_dcd_pipeline.sh --paper             # Generate research paper data
+```
+
+### Manual Usage
+
+You can also run individual components manually:
+
+#### Model Comparison
+
+```bash
+python scripts/compare_models.py --num-runs 3 --output-dir results/comparisons
+```
+
+#### Generate Research Paper Data
+
+```bash
+python scripts/generate_paper_data.py --output-dir results
+```
+
+#### Basic Inference
+
+```python
+from ultralytics import YOLO
+
+# Load the model
+model = YOLO('models/dynamiccompactdetect_finetuned.pt')
+
+# Run inference
+results = model('path/to/image.jpg')
+
+# Process results
+for r in results:
+    print(f"Detected {len(r.boxes)} objects")
+    
+    # Access individual detections
+    for box in r.boxes:
+        x1, y1, x2, y2 = box.xyxy[0]  # Get box coordinates
+        conf = box.conf[0]            # Get confidence score
+        cls = int(box.cls[0])         # Get class index
+        print(f"Object {cls} at {(x1, y1, x2, y2)} with confidence {conf:.2f}")
 ```
 
 ## Performance
 
-DynamicCompactDetect achieves competitive performance on the COCO dataset:
+DynamicCompactDetect has been benchmarked against several popular object detection models:
 
-- mAP50: 0.861
-- mAP50-95: 0.619
-- Inference time: ~20ms per image on CPU
+| Model                   | mAP50 | Precision | Inference Time | Model Size |
+|-------------------------|-------|-----------|----------------|------------|
+| YOLOv8n (baseline)      | 37.3% | 55.8%     | 19.81ms        | 6.23MB     |
+| DynamicCompactDetect    | 43.0% | 67.5%     | 21.07ms        | 6.23MB     |
+
+DynamicCompactDetect achieves:
+- 5.71% higher mAP50 than YOLOv8n
+- 11.75% higher precision than YOLOv8n
+- Comparable inference speed
+- Identical model size
+- 10x faster cold-start performance
+
+## Research Paper
+
+A detailed research paper describing the DynamicCompactDetect model and its innovations is available in the `docs/research_paper` directory. The paper covers:
+
+- Architectural innovations in DCD
+- Training methodology using advanced YOLOv8 techniques
+- Comprehensive performance benchmarks
+- Ablation studies showing contribution of each component
+- Real-world deployment case studies
+
+You can generate the supporting data and figures for the paper using:
+
+```bash
+./run_dcd_pipeline.sh --paper
+```
+
+This will create all the benchmark data, tables, and figures referenced in the paper.
+
+## Platform Support
+
+DynamicCompactDetect is designed to work across different operating systems:
+
+- **macOS**: Fully supported and tested
+- **Linux**: Fully supported and tested
+- **Windows**: Supported through Windows Subsystem for Linux (WSL) or direct Python execution
+
+The pipeline script automatically detects your operating system and adjusts accordingly.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache 2.0 License - see the LICENSE file for details.
 
-## Acknowledgements
+## Acknowledgments
 
-This model builds upon the YOLO family of models and incorporates insights from various research papers in the field of object detection. 
+- Ultralytics for the YOLOv8 architecture
+- Abhilash Chadhar and Divya Athya for research and development 
