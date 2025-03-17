@@ -1,0 +1,111 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env/
+
+# Model weights and checkpoints
+*.pt
+*.pth
+*.onnx
+*.weights
+*.engine
+*.trt
+*.tflite
+*.pb
+*.h5
+*.hdf5
+*.ckpt
+*.safetensors
+weights/
+
+# Datasets
+data/
+datasets/
+*.zip
+*.tar
+*.gz
+*.bz2
+*.xz
+*.7z
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.bin
+*.npy
+*.npz
+
+# Training outputs
+runs/
+results/
+logs/
+*.log
+*.csv
+*.json
+*.yaml
+*.yml
+events.out.tfevents.*
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Symlinks for datasets
+train2017.txt
+val2017.txt
+train2017_filtered.txt
+val2017_filtered.txt
+
+# Specific to this project
+dynamiccompactdetect.pt
+yolov*.pt
+
+# Keep these files
+!requirements.txt
+!setup.py
+!data/hyp.yaml
+!data/hyp_v11.yaml
+!data/coco8.yaml
+!data/coco.yaml 
