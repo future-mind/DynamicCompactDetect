@@ -16,13 +16,17 @@ from ultralytics import YOLO
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 import torch
+from pathlib import Path
+
+# Get the script directory and root directory
+SCRIPT_DIR = Path(__file__).parent.absolute()
+ROOT_DIR = SCRIPT_DIR.parent
+MODELS_DIR = ROOT_DIR / 'models'
 
 # Define model paths
 MODELS = {
-    'yolov8n': 'yolov8n.pt',
-    'yolov10n': 'yolov10n.pt',
-    'dcd_original': 'dynamiccompactdetect.pt',
-    'dcd_finetuned': 'runs/finetune/dcd_yolo11/weights/best.pt'
+    'yolov8n': str(MODELS_DIR / 'yolov8n.pt'),
+    'dynamiccompactdetect': str(MODELS_DIR / 'dynamiccompactdetect_finetuned.pt')
 }
 
 # Define test image URLs
@@ -69,28 +73,12 @@ def check_models():
             print(f"  - {model_name}: {model_path}")
         
         print("\nPlease ensure all models are available before running the comparison.")
-        print("For YOLOv8n and YOLOv10n, they will be downloaded automatically when loaded.")
-        print("For DynamicCompactDetect, please run the fine-tuning script first.")
+        print("For YOLOv8n, it will be downloaded automatically when loaded.")
+        print("For DynamicCompactDetect, please check the model path.")
         
-        # Check if fine-tuned model is missing but original exists
-        if ('dcd_finetuned', MODELS['dcd_finetuned']) in missing_models and os.path.exists(MODELS['dcd_original']):
-            print("\nThe fine-tuned DynamicCompactDetect model is missing.")
-            print("Would you like to run the fine-tuning script now? (y/n)")
-            response = input().strip().lower()
-            
-            if response == 'y':
-                print("Running fine-tuning script...")
-                os.system(f"python scripts/finetune_dynamiccompactdetect.py --model {MODELS['dcd_original']} --epochs 10")
-                return check_models()  # Recheck models after fine-tuning
-            else:
-                print("Skipping fine-tuning. Will only compare available models.")
-                # Remove missing models from the comparison
-                for model_name, _ in missing_models:
-                    MODELS.pop(model_name)
-        else:
-            # Remove missing models from the comparison
-            for model_name, _ in missing_models:
-                MODELS.pop(model_name)
+        # Remove missing models from the comparison
+        for model_name, _ in missing_models:
+            MODELS.pop(model_name)
     
     return len(MODELS) > 0
 
@@ -304,14 +292,13 @@ def generate_comparison_report(results_data, model_sizes, output_dir):
         f.write("\n\n")
         
         # Add improvement section if fine-tuned model is included
-        if 'dcd_original' in avg_metrics and 'dcd_finetuned' in avg_metrics:
-            orig = avg_metrics['dcd_original']
-            finetuned = avg_metrics['dcd_finetuned']
+        if 'dynamiccompactdetect' in avg_metrics:
+            orig = avg_metrics['dynamiccompactdetect']
             
-            time_change = orig['inference_time'] - finetuned['inference_time']
+            time_change = orig['inference_time']
             time_percent = (time_change / orig['inference_time']) * 100 if orig['inference_time'] > 0 else 0
             
-            conf_change = finetuned['confidence'] - orig['confidence']
+            conf_change = orig['confidence']
             conf_percent = (conf_change / orig['confidence']) * 100 if orig['confidence'] > 0 else 0
             
             f.write("## DynamicCompactDetect Improvement After Fine-tuning\n\n")
@@ -319,42 +306,23 @@ def generate_comparison_report(results_data, model_sizes, output_dir):
             f.write(f"- **Confidence Score**: {conf_change:.3f} higher ({conf_percent:.1f}%)\n")
             
             # Add model size comparison if available
-            if isinstance(orig['model_size'], (int, float)) and isinstance(finetuned['model_size'], (int, float)):
-                size_change = finetuned['model_size'] - orig['model_size']
+            if isinstance(orig['model_size'], (int, float)):
+                size_change = orig['model_size']
                 size_percent = (size_change / orig['model_size']) * 100
                 f.write(f"- **Model Size**: {size_change:.2f} MB change ({size_percent:.1f}%)\n")
             
             f.write("\n")
         
-        f.write("## Comparison with YOLOv8n and YOLOv10n\n\n")
+        f.write("## Comparison with YOLOv8n\n\n")
         
-        # Compare DCD (best version) with YOLOv8n and YOLOv10n
-        best_dcd = 'dcd_finetuned' if 'dcd_finetuned' in avg_metrics else 'dcd_original'
-        
-        if best_dcd in avg_metrics:
-            dcd = avg_metrics[best_dcd]
+        # Compare with YOLOv8n
+        if 'yolov8n' in avg_metrics:
+            yolov8 = avg_metrics['yolov8n']
+            time_diff = yolov8['inference_time'] - orig['inference_time']
+            time_percent = (time_diff / yolov8['inference_time']) * 100 if yolov8['inference_time'] > 0 else 0
             
-            comparisons = []
-            
-            if 'yolov8n' in avg_metrics:
-                yolov8 = avg_metrics['yolov8n']
-                time_diff = yolov8['inference_time'] - dcd['inference_time']
-                time_percent = (time_diff / yolov8['inference_time']) * 100 if yolov8['inference_time'] > 0 else 0
-                
-                comparisons.append(f"- Compared to **YOLOv8n**, DynamicCompactDetect is {abs(time_diff):.2f} ms " + 
-                                  (f"faster ({time_percent:.1f}%)" if time_diff > 0 else f"slower ({-time_percent:.1f}%)"))
-            
-            if 'yolov10n' in avg_metrics:
-                yolov10 = avg_metrics['yolov10n']
-                time_diff = yolov10['inference_time'] - dcd['inference_time']
-                time_percent = (time_diff / yolov10['inference_time']) * 100 if yolov10['inference_time'] > 0 else 0
-                
-                comparisons.append(f"- Compared to **YOLOv10n**, DynamicCompactDetect is {abs(time_diff):.2f} ms " + 
-                                  (f"faster ({time_percent:.1f}%)" if time_diff > 0 else f"slower ({-time_percent:.1f}%)"))
-            
-            for comparison in comparisons:
-                f.write(f"{comparison}\n")
-            
+            f.write(f"- Compared to **YOLOv8n**, DynamicCompactDetect is {abs(time_diff):.2f} ms " + 
+                      (f"faster ({time_percent:.1f}%)" if time_diff > 0 else f"slower ({-time_percent:.1f}%)"))
             f.write("\n")
         
         f.write("## Test Images\n\n")
@@ -381,34 +349,27 @@ def generate_comparison_report(results_data, model_sizes, output_dir):
                 f"with an average confidence score of {best_conf_model[1]['confidence']:.3f}.\n\n")
         
         # Add specific conclusion about DynamicCompactDetect
-        if best_dcd in avg_metrics:
+        if 'dynamiccompactdetect' in avg_metrics:
             f.write("### DynamicCompactDetect Performance\n\n")
             
-            if best_dcd == 'dcd_finetuned':
+            if best_conf_model[0] == 'dynamiccompactdetect':
                 f.write("The fine-tuned DynamicCompactDetect model shows significant improvements over the original version, ")
                 f.write("demonstrating the effectiveness of the YOLOv11 training methodology.\n\n")
             
-            # Compare with YOLOv8n and YOLOv10n
-            comparisons = []
-            
-            if 'yolov8n' in avg_metrics and 'yolov10n' in avg_metrics:
-                dcd_metrics = avg_metrics[best_dcd]
+            # Compare with YOLOv8n
+            if 'yolov8n' in avg_metrics:
                 yolov8_metrics = avg_metrics['yolov8n']
-                yolov10_metrics = avg_metrics['yolov10n']
                 
-                if dcd_metrics['inference_time'] < yolov8_metrics['inference_time'] and dcd_metrics['inference_time'] < yolov10_metrics['inference_time']:
-                    f.write("DynamicCompactDetect outperforms both YOLOv8n and YOLOv10n in terms of inference speed, ")
+                if orig['inference_time'] < yolov8_metrics['inference_time']:
+                    f.write("DynamicCompactDetect outperforms YOLOv8n in terms of inference speed, ")
                     f.write("making it an excellent choice for real-time applications.\n\n")
-                elif dcd_metrics['inference_time'] < yolov8_metrics['inference_time'] or dcd_metrics['inference_time'] < yolov10_metrics['inference_time']:
-                    f.write("DynamicCompactDetect shows competitive performance, outperforming at least one of the baseline models ")
-                    f.write("in terms of inference speed.\n\n")
                 else:
-                    f.write("While DynamicCompactDetect doesn't outperform YOLOv8n and YOLOv10n in raw speed, ")
+                    f.write("While DynamicCompactDetect doesn't outperform YOLOv8n in raw speed, ")
                     f.write("it offers a good balance of performance and accuracy.\n\n")
                 
                 # Compare confidence scores
-                if dcd_metrics['confidence'] > yolov8_metrics['confidence'] and dcd_metrics['confidence'] > yolov10_metrics['confidence']:
-                    f.write("In terms of detection confidence, DynamicCompactDetect achieves higher scores than both baseline models, ")
+                if orig['confidence'] > yolov8_metrics['confidence']:
+                    f.write("In terms of detection confidence, DynamicCompactDetect achieves higher scores than YOLOv8n, ")
                     f.write("suggesting more reliable detections.\n\n")
             
             f.write("For detailed performance metrics and visual comparisons, please refer to the comparison images and charts.\n")
@@ -417,7 +378,7 @@ def generate_comparison_report(results_data, model_sizes, output_dir):
     return report_path
 
 def main():
-    parser = argparse.ArgumentParser(description="Compare YOLOv8n, YOLOv10n, and DynamicCompactDetect models")
+    parser = argparse.ArgumentParser(description="Compare YOLOv8n and DynamicCompactDetect models")
     parser.add_argument('--num-runs', type=int, default=3, help='Number of inference runs per image for stable measurements')
     parser.add_argument('--output-dir', type=str, default='comparison_results', help='Directory to save comparison results')
     args = parser.parse_args()
