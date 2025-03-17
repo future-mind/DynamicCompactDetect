@@ -2,6 +2,8 @@
 """
 Script to compare YOLOv8n, YOLOv10n, and DynamicCompactDetect models (original and fine-tuned).
 This script evaluates all models on the same test images and generates a comprehensive comparison report.
+
+Authors: Abhilash Chadhar and Divya Athya
 """
 
 import time
@@ -23,22 +25,22 @@ MODELS = {
     'dcd_finetuned': 'runs/finetune/dcd_yolo11/weights/best.pt'
 }
 
-# Define test images
-TEST_IMAGES = [
+# Define test image URLs
+TEST_IMAGE_URLS = [
     'https://ultralytics.com/images/zidane.jpg',
     'https://ultralytics.com/images/bus.jpg',
     'https://ultralytics.com/images/person.jpg'
 ]
 
 def download_test_images():
-    """Download test images if they don't exist."""
+    """Download test images if they don't exist and return local paths."""
     import urllib.request
     
     os.makedirs('data/test_images', exist_ok=True)
     
     local_test_images = []
     
-    for i, url in enumerate(TEST_IMAGES):
+    for i, url in enumerate(TEST_IMAGE_URLS):
         img_name = url.split('/')[-1]
         img_path = os.path.join('data/test_images', img_name)
         local_test_images.append(img_path)
@@ -357,7 +359,7 @@ def generate_comparison_report(results_data, model_sizes, output_dir):
         
         f.write("## Test Images\n\n")
         f.write("The comparison was performed on the following test images:\n\n")
-        for url in TEST_IMAGES:
+        for url in TEST_IMAGE_URLS:
             img_name = url.split('/')[-1]
             f.write(f"- {img_name}\n")
         f.write("\n")
