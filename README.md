@@ -12,6 +12,7 @@ Key features:
 - Compact size (6.23MB)
 - Superior cold-start performance (10x faster than alternatives)
 - Simple integration in any framework that supports YOLO models
+- Tiled detection for improved tiny object detection
 
 ## Project Structure
 
@@ -27,9 +28,11 @@ DynamicCompactDetect/
 ├── results/               # Results directory
 │   ├── benchmarks/        # Performance benchmarks
 │   ├── comparisons/       # Model comparison visualizations
+│   ├── tiled_detection/   # Results from tiled detection approach
 │   └── research_paper/    # Generated research paper data
 ├── scripts/               # Utility scripts
 │   ├── compare_models.py  # Script to compare model performance
+│   ├── tiled_detector.py  # Script for tiled detection approach
 │   └── generate_paper_data.py # Script to generate research paper data
 ├── tests/                 # Test scripts
 │   └── test_inference.py  # Simple inference test
@@ -124,6 +127,23 @@ You can also run individual components manually:
 python scripts/compare_models.py --num-runs 3 --output-dir results/comparisons
 ```
 
+#### Tiled Detection for Tiny Objects
+
+The tiled detection approach improves detection of small objects by dividing images into smaller, overlapping tiles:
+
+```bash
+python scripts/tiled_detector.py --model models/dynamiccompactdetect_finetuned.pt --tile-size 320 --overlap 0.2
+```
+
+Options:
+- `--tile-size`: Size of each tile in pixels (default: 320)
+- `--overlap`: Overlap between tiles as a fraction (default: 0.2)
+- `--conf`: Confidence threshold for detections (default: 0.25)
+- `--image-dir`: Directory containing input images (default: data/test_images)
+- `--output-dir`: Directory for saving results (default: results/tiled_detection)
+
+For more details, see [Tiled Detection README](scripts/tiled_detection_README.md).
+
 #### Generate Research Paper Data
 
 ```bash
@@ -170,6 +190,22 @@ DynamicCompactDetect achieves:
 - 10x faster cold-start performance
 
 Results generated using commit ID: 78fec1c1a1ea83fec088bb049fef867690296518
+
+### Tiled Detection Performance
+
+When using our tiled detection approach for tiny objects:
+
+| Metric               | Improvement                   |
+|----------------------|-------------------------------|
+| Detection Count      | +14 objects (average)         |
+| Tiny Object Detection| Significantly improved        |
+| Processing Time      | +0.60s per image (trade-off)  |
+| Confidence           | -0.073 (slightly lower)       |
+
+The tiled detection approach is particularly effective for:
+- Small object detection in high-resolution images
+- Dense scenes with many tiny objects
+- Applications where detection accuracy is more critical than speed
 
 ## Research Paper
 
