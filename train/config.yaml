@@ -1,0 +1,107 @@
+# DynamicCompactDetect Training Configuration
+
+# Dataset paths
+dataset:
+  name: "coco"
+  train_images: "data/coco/train2017"
+  train_annotations: "data/coco/annotations/instances_train2017.json"
+  val_images: "data/coco/val2017"
+  val_annotations: "data/coco/annotations/instances_val2017.json"
+  num_classes: 80
+  mini_dataset: false  # Set to true to use the smaller dataset for quick testing
+
+# Model configuration
+model:
+  name: "dynamiccompactdetect"
+  input_size: [640, 640]  # Width, Height
+  base_channels: 32
+  num_classes: 80
+  use_dynamic_blocks: true
+  use_early_exit: true
+  confidence_threshold: 0.8
+  selective_routing: true
+  num_experts: 4
+
+# Training parameters
+training:
+  batch_size: 16
+  epochs: 300
+  initial_lr: 0.01
+  warmup_epochs: 3
+  warmup_momentum: 0.8
+  weight_decay: 0.0005
+  momentum: 0.937
+  optimizer: "adamw"  # Options: sgd, adam, adamw
+  lr_scheduler: "cosine"  # Options: step, cosine, linear, polynomial
+  early_stopping_patience: 15
+  clip_gradients: 1.0
+  use_ema: true
+  ema_decay: 0.9998
+  mixed_precision: true
+
+# Data augmentation
+augmentation:
+  mosaic_prob: 0.5
+  mixup_prob: 0.25
+  copy_paste_prob: 0.1
+  random_perspective_prob: 0.5
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+  use_cutout: true
+  use_solarize: true
+  use_autoaugment: false  # Enable for more complex augmentations
+
+# Loss configuration
+loss:
+  box_loss_weight: 0.05
+  cls_loss_weight: 0.5
+  obj_loss_weight: 1.0
+  label_smoothing: 0.1
+  focal_loss_gamma: 2.0
+  early_exit_aux_loss_weight: 0.3
+
+# Validation parameters
+validation:
+  val_interval: 10  # Validate every N epochs
+  iou_threshold: 0.65  # IoU threshold for evaluation
+  conf_threshold: 0.001  # Confidence threshold for evaluation
+
+# Checkpoint and saving
+checkpoints:
+  save_dir: "data/weights"
+  save_interval: 10  # Save checkpoint every N epochs
+  save_best: true
+  save_last: true
+  max_keep: 5  # Maximum number of checkpoints to keep
+
+# Logging
+logging:
+  tensorboard: true
+  log_dir: "logs"
+  log_interval: 50  # Log every N batches
+  log_images: true
+  log_metrics: true
+
+# Hardware-specific settings
+hardware:
+  num_workers: 8
+  pinned_memory: true
+  gpu_ids: [0]  # List of GPU IDs to use
+  use_platform_optimizations: true  # Enable CUDA/Metal optimizations
+
+# Dynamic feature configuration
+dynamic_features:
+  enable_dynamic_early_exit_threshold: true  # Dynamically adjust early exit threshold
+  adjust_early_exit_epoch: 100  # Start adjusting early exit threshold after this epoch
+  dynamic_routing_schedule_start: 0.1  # Percentage of training when to start enforcing dynamic routing
+  routing_temperature: 1.0  # Temperature for routing softmax
+
+# Advanced options
+advanced:
+  seed: 42  # Random seed for reproducibility
+  deterministic: false  # Set to true for fully deterministic results (slower)
+  cudnn_benchmark: true  # Set to false if encountering CUDA errors
+  profile: false  # Enable profiling for performance analysis
+  onnx_export: true  # Export model to ONNX after training
+  debug_mode: false  # Enable debug logging and checks 
