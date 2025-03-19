@@ -182,15 +182,15 @@ The following results were generated using commit ID: 78fec1c1a1ea83fec088bb049f
 
 | Model | Inference Time (ms) | Detections | Confidence | Model Size (MB) |
 |-------|---------------------|------------|------------|----------------|
-| YOLOv8n | 244.94 | 4.5 | 0.667 | 6.23 |
-| DynamicCompactDetect | 26.69 | 4.5 | 0.604 | 6.23 |
+| YOLOv8n | 40.62 | 4.5 | 0.652 | 6.23 |
+| DynamicCompactDetect | 40.29 | 4.5 | 0.652 | 6.25 |
 
 ### Key Findings
 
-- DynamicCompactDetect is **218.25 ms faster** (89.1%) than YOLOv8n
+- DynamicCompactDetect is **0.33 ms faster** (0.8%) than YOLOv8n
 - Both models detect approximately the same number of objects
-- YOLOv8n has 9.4% higher confidence in its detections
-- Both models have identical file sizes
+- Both models have similar confidence in their detections
+- Both models have similar file sizes
 
 ## Integration in Your Projects
 
