@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import matplotlib.pyplot as plt
+import torch
 
 # Define paths
 SCRIPT_DIR = Path(__file__).parent.absolute()
@@ -29,21 +30,28 @@ MODELS = {
     'DynamicCompactDetect': str(MODELS_DIR / 'dynamiccompactdetect_finetuned.pt')
 }
 
-def run_inference(model, img_path, num_runs=3):
+def run_inference(model, img_path, num_runs=3, edge_device_mode=False):
     """Run inference on an image and measure performance metrics."""
     img = cv2.imread(img_path)
     if img is None:
         print(f"Error: Could not read image {img_path}")
         return None, 0, 0, 0
     
+    # Set device for edge device emulation
+    if edge_device_mode:
+        # Force CPU single-thread for edge device emulation
+        print("  Using edge device emulation mode (CPU, single thread)")
+        torch.set_num_threads(1)
+        model.to('cpu')
+    
     # Warm-up run
-    _ = model(img)
+    _ = model(img, verbose=False)
     
     # Multiple timed runs for more stable measurements
     inference_times = []
-    for _ in range(num_runs):
+    for i in range(num_runs):
         start_time = time.time()
-        results = model(img)
+        results = model(img, verbose=True if i == 0 else False)
         inference_time = (time.time() - start_time) * 1000  # Convert to milliseconds
         inference_times.append(inference_time)
     
@@ -247,86 +255,80 @@ def main():
     parser = argparse.ArgumentParser(description="Compare YOLOv8n and DynamicCompactDetect models")
     parser.add_argument('--num-runs', type=int, default=5, help='Number of inference runs per image for stable measurements')
     parser.add_argument('--output-dir', type=str, default='results/comparisons', help='Directory to save comparison results')
+    parser.add_argument('--edge-device', action='store_true', help='Emulate edge device environment (CPU, single thread)')
     args = parser.parse_args()
     
-    # Check if test images exist
-    test_images = [str(p) for p in TEST_IMAGES_DIR.glob('*.jpg') if p.is_file()]
+    # Create output directory
+    os.makedirs(args.output_dir, exist_ok=True)
+    
+    # Load all models
+    models = {}
+    model_sizes = {}
+    for model_name, model_path in MODELS.items():
+        if os.path.exists(model_path):
+            print(f"Loading {model_name} from {model_path}...")
+            model = YOLO(model_path)
+            models[model_name] = model
+            model_sizes[model_name] = os.path.getsize(model_path) / (1024 * 1024)
+            print(f"  Model size: {model_sizes[model_name]:.2f} MB")
+        else:
+            print(f"Error: Model {model_name} not found at {model_path}")
+    
+    # Get test images
+    test_images = list(TEST_IMAGES_DIR.glob('*.jpg')) + list(TEST_IMAGES_DIR.glob('*.png'))
     if not test_images:
         print(f"Error: No test images found in {TEST_IMAGES_DIR}")
         sys.exit(1)
     
-    # Load models
-    loaded_models = {}
-    model_sizes = {}
-    
-    for model_name, model_path in MODELS.items():
-        if not os.path.exists(model_path):
-            print(f"Error: Model {model_name} not found at {model_path}")
-            continue
-        
-        try:
-            print(f"Loading {model_name} from {model_path}...")
-            model = YOLO(model_path)
-            loaded_models[model_name] = model
-            model_sizes[model_name] = os.path.getsize(model_path) / (1024 * 1024)  # Size in MB
-            print(f"  Model size: {model_sizes[model_name]:.2f} MB")
-        except Exception as e:
-            print(f"Error loading {model_name}: {e}")
-    
-    if not loaded_models:
-        print("Error: No models could be loaded. Exiting.")
-        sys.exit(1)
-    
-    print(f"Found {len(loaded_models)} models for comparison:")
-    for model_name, model_path in MODELS.items():
-        if model_name in loaded_models:
-            print(f"  - {model_name}: {model_path}")
+    print(f"Found {len(models)} models for comparison:")
+    for model_name, model in models.items():
+        print(f"  - {model_name}: {model.ckpt_path}")
     
     print(f"Using {len(test_images)} test images:")
     for img_path in test_images:
         print(f"  - {img_path}")
+    print()
     
-    # Run comparison
-    results_data = {model_name: [] for model_name in loaded_models}
+    # Run inference on each image with each model
+    results_data = {model_name: [] for model_name in models}
     
     for img_path in test_images:
-        print(f"\nProcessing {os.path.basename(img_path)}...")
+        img_name = img_path.stem
+        print(f"Processing {img_path.name}...")
         
-        # Store results for this image
-        image_results = {}
+        # Results for this image
+        img_results = {}
         
-        for model_name, model in loaded_models.items():
+        # Run inference with each model
+        for model_name, model in models.items():
             print(f"  Running inference with {model_name}...")
-            results, avg_time, num_detections, avg_confidence = run_inference(model, img_path, args.num_runs)
+            result, avg_time, num_detections, avg_confidence = run_inference(
+                model, str(img_path), num_runs=args.num_runs, edge_device_mode=args.edge_device
+            )
             
-            if results is not None:
+            if result is not None:
                 print(f"    Inference time: {avg_time:.2f} ms, Detections: {num_detections}, Confidence: {avg_confidence:.3f}")
-                image_results[model_name] = (results, avg_time, num_detections, avg_confidence)
-                results_data[model_name].append((img_path, avg_time, num_detections, avg_confidence))
+                results_data[model_name].append((result, avg_time, num_detections, avg_confidence))
+                img_results[model_name] = (result, avg_time, num_detections, avg_confidence)
         
-        # Create comparison image
-        if len(image_results) > 1:  # Only create comparison if we have multiple models
-            comparison_path = save_comparison_image(img_path, image_results, args.output_dir)
-            print(f"  Comparison image saved to {comparison_path}")
+        # Create comparison image for this image
+        if len(img_results) > 1:
+            save_comparison_image(str(img_path), img_results, args.output_dir)
+            print(f"  Comparison image saved to {args.output_dir}/comparison_{img_name}.png")
     
     # Create performance charts
-    if results_data:
+    if len(results_data) > 1 and all(len(data) > 0 for data in results_data.values()):
         chart_path = create_performance_charts(results_data, args.output_dir)
-        print(f"\nPerformance charts saved to {chart_path}")
+        print(f"Performance charts saved to {chart_path}")
+        print()
     
-    # Generate report
-    if results_data:
-        print("\nGenerating comparison report...")
-        report_path = generate_report(results_data, model_sizes, args.output_dir)
-        print(f"Comparison report saved to {report_path}")
-        
-        # Debug: Check if the report file exists
-        if os.path.exists(report_path):
-            print(f"Report file exists at {report_path} with size {os.path.getsize(report_path)} bytes")
-        else:
-            print(f"ERROR: Report file does not exist at {report_path}")
-    
-    print("\nComparison completed successfully!")
+    # Generate comparison report
+    print("Generating comparison report...")
+    report_path = generate_report(results_data, model_sizes, args.output_dir)
+    print(f"Comparison report saved to {report_path}")
+    print(f"Report file exists at {report_path} with size {os.path.getsize(report_path)} bytes")
+    print()
+    print("Comparison completed successfully!")
 
 if __name__ == "__main__":
     main() 
