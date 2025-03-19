@@ -1,9 +1,9 @@
 {
   "model_name": "DynamicCompactDetect",
   "model_path": "/Users/abhilashchadhar/Library/CloudStorage/OneDrive-AXELERAAI/Documents/cursor/Object-detect/DynamicCompactDetect/models/dynamiccompactdetect_finetuned.pt",
-  "inference_time": 26.68619155883789,
+  "inference_time": 26.061058044433594,
   "detection_count": 4.5,
-  "confidence": 0.6036407075822353,
+  "confidence": 0.6520975679159164,
   "num_images": 2,
   "images_with_detections": 2
 }

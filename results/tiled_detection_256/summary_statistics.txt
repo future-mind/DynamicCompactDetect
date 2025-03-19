@@ -1,0 +1,31 @@
+=== Tiled Detection vs Regular Detection Summary ===
+
+== Detection Count Difference ==
+Mean: 20.00
+Median: 20.00
+Min: 16.00
+Max: 24.00
+
+== Confidence Difference ==
+Mean: -0.1970
+Median: -0.1970
+Min: -0.2543
+Max: -0.1396
+
+== Tiny Object Count Difference ==
+Mean: 0.00
+Median: 0.00
+Min: 0.00
+Max: 0.00
+
+== Average Size Difference ==
+Mean: -161597.58
+Median: -161597.58
+Min: -237238.63
+Max: -85956.54
+
+== Time Difference ==
+Mean: 1.2262
+Median: 1.2262
+Min: 1.1253
+Max: 1.3272

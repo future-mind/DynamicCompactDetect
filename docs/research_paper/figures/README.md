@@ -17,7 +17,7 @@ The data presented in these figures is derived from experiments conducted betwee
 - Raspberry Pi 4 (4GB)
 - Intel Neural Compute Stick 2
 - ARM Cortex-M7 microcontroller
-- Custom Axelera AI EdgeTPU
+- Custom Edge TPU
 
 ## Reproduction
 

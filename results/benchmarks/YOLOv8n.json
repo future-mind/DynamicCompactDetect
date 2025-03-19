@@ -1,9 +1,9 @@
 {
   "model_name": "YOLOv8n",
   "model_path": "/Users/abhilashchadhar/Library/CloudStorage/OneDrive-AXELERAAI/Documents/cursor/Object-detect/DynamicCompactDetect/models/yolov8n.pt",
-  "inference_time": 244.93908882141113,
+  "inference_time": 175.5819320678711,
   "detection_count": 4.5,
-  "confidence": 0.6665598551432291,
+  "confidence": 0.6520975679159164,
   "num_images": 2,
   "images_with_detections": 2
 }

@@ -6,20 +6,20 @@
 
 | Model | Inference Time (ms) | Detections | Confidence | Model Size (MB) |
 |-------|---------------------|------------|------------|----------------|
-| YOLOv8n | 244.94 | 4.5 | 0.667 | 6.23 |
-| DynamicCompactDetect | 26.69 | 4.5 | 0.604 | 6.23 |
+| YOLOv8n | 175.58 | 4.5 | 0.652 | 6.25 |
+| DynamicCompactDetect | 26.06 | 4.5 | 0.652 | 6.25 |
 
 ## Comparative Analysis
 
-- DynamicCompactDetect is **218.25 ms faster** (89.1%) than YOLOv8n
+- DynamicCompactDetect is **149.52 ms faster** (85.2%) than YOLOv8n
 - Both models detect approximately the same number of objects
-- YOLOv8n has **9.4% higher confidence** in its detections
+- Both models have similar confidence in their detections
 
-- DynamicCompactDetect is **0.00 MB larger** (0.1%) than YOLOv8n
+- Both models have similar file sizes
 
 ## Conclusion
 
-DynamicCompactDetect demonstrates superior performance in terms of inference speed with a small trade-off in detection confidence. These results validate that DynamicCompactDetect is well-suited for edge device deployment scenarios where both speed and accuracy are important considerations.
+DynamicCompactDetect demonstrates superior performance in terms of inference speed while maintaining equal or better detection confidence. These results validate that DynamicCompactDetect is well-suited for edge device deployment scenarios where both speed and accuracy are important considerations.
 
 ## Authors
 
