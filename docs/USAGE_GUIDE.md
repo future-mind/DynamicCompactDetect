@@ -1,197 +1,241 @@
 # DynamicCompactDetect: Comprehensive Usage Guide
 
-This guide provides detailed instructions for using all aspects of the DynamicCompactDetect (DCD) project, from setup to benchmarking, visualization, and research paper generation.
+This document provides detailed instructions for using the DynamicCompactDetect (DCD) model, including environment setup, running benchmarks, performing inference, and fine-tuning the model.
 
 ## Table of Contents
+1. [Environment Setup](#environment-setup)
+2. [Available Scripts](#available-scripts)
+3. [Running Benchmarks](#running-benchmarks)
+4. [Comparing Models](#comparing-models)
+5. [Visualizing Detections](#visualizing-detections)
+6. [Fine-tuning on Custom Data](#fine-tuning-on-custom-data)
+7. [Generating Research Paper Data](#generating-research-paper-data)
+8. [Running the Complete Pipeline](#running-the-complete-pipeline)
+9. [Troubleshooting](#troubleshooting)
+10. [Additional Resources](#additional-resources)
 
-1. [Environment Setup](#1-environment-setup)
-2. [Running Benchmarks](#2-running-benchmarks)
-3. [Visualizing Detections](#3-visualizing-detections)
-4. [Generating Reports](#4-generating-reports)
-5. [Fine-tuning the Model](#5-fine-tuning-the-model)
-6. [Research Paper Data Generation](#6-research-paper-data-generation)
-7. [End-to-End Pipeline](#7-end-to-end-pipeline)
-8. [Custom Integration](#8-custom-integration)
-9. [Troubleshooting](#9-troubleshooting)
+## Environment Setup
 
-## 1. Environment Setup
+### Prerequisites
+- Python 3.8 or later
+- CUDA-compatible GPU (optional but recommended for training)
+- Git
 
-### 1.1 Clone the Repository
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/future-mind/dynamiccompactdetect.git
+   cd dynamiccompactdetect
+   ```
+
+2. Create and activate a virtual environment:
+   
+   **macOS/Linux:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+   
+   **Windows:**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Verify installation:
+   ```bash
+   python -c "from ultralytics import YOLO; print('Installation successful!')"
+   ```
+
+## Available Scripts
+
+DynamicCompactDetect comes with several utility scripts:
+
+| Script | Description |
+|--------|-------------|
+| `compare_models.py` | Compare inference performance between YOLOv8n and DynamicCompactDetect |
+| `generate_benchmarks.py` | Generate detailed benchmark data for both models |
+| `generate_report.py` | Create a comprehensive comparison report |
+| `compare_all_models.py` | Compare across multiple model variants (if available) |
+| `finetune_dynamiccompactdetect_v8.py` | Fine-tune the model on custom datasets |
+| `generate_paper_data.py` | Generate data and figures for research paper |
+| `generate_visualizations.py` | Create visualizations of model performance |
+| `test_dynamiccompactdetect_inference.py` | Simple test script for inference |
+
+## Running Benchmarks
+
+To evaluate the performance of DynamicCompactDetect and compare it with YOLOv8n:
 
 ```bash
-git clone https://github.com/future-mind/dynamiccompactdetect.git
-cd dynamiccompactdetect
-```
-
-### 1.2 Create a Virtual Environment
-
-**macOS/Linux:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-**Windows:**
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 1.3 Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 1.4 Verify Directory Structure
-
-Ensure the following directories exist (they will be created automatically by the scripts if missing):
-```bash
-mkdir -p models data/test_images results/{benchmarks,comparisons}
-```
-
-## 2. Running Benchmarks
-
-The benchmark process evaluates both YOLOv8n and DynamicCompactDetect models on test images, measuring inference time, detection counts, and confidence scores.
-
-### 2.1 Generate Benchmark Data
-
-```bash
+# Generate benchmarks for both models
 python scripts/generate_benchmarks.py
 ```
 
 This script:
 1. Loads both YOLOv8n and DynamicCompactDetect models
 2. Runs inference on test images in `data/test_images/`
-3. Measures inference time, detection count, and confidence for each model
-4. Saves the benchmark results to `results/benchmarks/` as JSON files
+3. Measures inference time, detection count, and confidence scores
+4. Saves benchmark data to `results/benchmarks/`
 
-**Expected Output:**
+### Command-line Arguments
+
+```
+--output-dir OUTPUT_DIR   Directory to save benchmark results (default: results/benchmarks)
+--num-runs NUM_RUNS       Number of inference runs for more accurate timing (default: 5)
+--edge-device             Enable edge device simulation (slower but more realistic for edge deployment)
+```
+
+Example with custom settings:
+```bash
+python scripts/generate_benchmarks.py --num-runs 10 --edge-device
+```
+
+### Output
+
+The script saves JSON files with benchmark results:
 - `results/benchmarks/YOLOv8n.json`
 - `results/benchmarks/DynamicCompactDetect.json`
 
-### 2.2 Examining Benchmark Results
-
-To view the benchmark results directly:
-
-```bash
-cat results/benchmarks/YOLOv8n.json
-cat results/benchmarks/DynamicCompactDetect.json
-```
-
-Each JSON file contains:
+Each file contains:
+- `model_name`: Name of the model
+- `model_path`: Path to the model file
 - `inference_time`: Average inference time in milliseconds
-- `detection_count`: Average number of objects detected per image
+- `detection_count`: Average number of detections per image
 - `confidence`: Average confidence score for detections
-- `model_size`: Size of the model in MB
+- `num_images`: Number of test images used
+- `images_with_detections`: Number of images where objects were detected
 
-## 3. Visualizing Detections
+## Comparing Models
 
-The comparison script generates visual comparisons of detections from both models.
-
-### 3.1 Run Model Comparison
+For a detailed comparison between YOLOv8n and DynamicCompactDetect:
 
 ```bash
 python scripts/compare_models.py
 ```
 
 This script:
-1. Loads both YOLOv8n and DynamicCompactDetect models
-2. Runs inference on test images
-3. Generates side-by-side comparison visualizations
-4. Creates performance charts (inference time, detection count, confidence)
-5. Saves all visualizations to `results/comparisons/`
+1. Runs inference with both models on test images
+2. Generates side-by-side comparison images
+3. Creates performance charts
+4. Generates a comprehensive comparison report
 
-**Expected Output:**
-- Side-by-side detection images (e.g., `comparison_bus.jpg`)
-- Individual detection outputs for each model in separate folders
-- Performance charts comparing both models
+### Command-line Arguments
 
-### 3.2 Examining Visualization Results
-
-Open the generated comparison images in `results/comparisons/` to visually assess detection quality.
-
-## 4. Generating Reports
-
-The report generation script creates a detailed Markdown report comparing both models.
-
-### 4.1 Generate Comparison Report
-
-```bash
-python scripts/generate_report.py
+```
+--num-runs NUM_RUNS       Number of inference runs for timing (default: 5)
+--output-dir OUTPUT_DIR   Directory to save comparison results (default: results/comparisons)
+--edge-device             Enable edge device simulation (CPU-only, single thread)
 ```
 
-This script:
-1. Loads benchmark data from `results/benchmarks/`
-2. Calculates comparative metrics (speed improvement, confidence difference)
-3. Generates a comprehensive report with tables and analysis
-4. Saves the report to `results/comparisons/model_comparison_report.md`
-
-**Expected Output:**
-- `results/comparisons/model_comparison_report.md`
-
-### 4.2 Examining the Report
-
-Open the generated report in a Markdown viewer or directly in your IDE:
-
+Example with custom settings:
 ```bash
-cat results/comparisons/model_comparison_report.md
+python scripts/compare_models.py --num-runs 25 --edge-device
 ```
 
-The report includes:
-- Performance summary table
-- Comparative analysis of key metrics
-- Speed improvement calculation
-- Detection capability comparison
-- Confidence score analysis
-- Conclusion on model suitability for edge deployment
+### Output
 
-## 5. Fine-tuning the Model
+The script generates:
+1. Comparison images showing detections from both models side-by-side
+   - `results/comparisons/comparison_*.png`
+2. Performance comparison chart
+   - `results/comparisons/performance_comparison.png`
+3. Markdown report summarizing the comparison
+   - `results/comparisons/model_comparison_report.md`
 
-The fine-tuning script allows you to adapt DynamicCompactDetect to your custom dataset.
+## Visualizing Detections
 
-### 5.1 Prepare Your Dataset
-
-Prepare your dataset in YOLOv8 format:
-- A YAML file describing your dataset structure
-- Images and labels in the appropriate directories
-
-### 5.2 Run Fine-tuning
+To visualize detections from a specific model:
 
 ```bash
-python scripts/finetune_dynamiccompactdetect_v8.py \
-  --data path/to/your/dataset.yaml \
-  --epochs 50 \
-  --batch-size 16 \
-  --img 640 \
-  --output-dir results/finetuned
+python scripts/test_dynamiccompactdetect_inference.py --model dcd --image data/test_images/bus.jpg --save-output
 ```
 
-This script:
-1. Loads the base DynamicCompactDetect model
-2. Configures the training parameters
-3. Fine-tunes the model on your dataset
-4. Saves the fine-tuned model and training metrics
+### Command-line Arguments
 
-**Expected Output:**
-- Fine-tuned model in the specified output directory
-- Training metrics and logs
-- Validation results and confusion matrix
+```
+--model MODEL             Model to use for inference ('yolov8n' or 'dcd') (default: dcd)
+--image IMAGE             Path to test image (default: data/test_images/bus.jpg)
+--num-runs NUM_RUNS       Number of inference runs for timing (default: 5)
+--output-dir OUTPUT_DIR   Directory to save results (default: results)
+--save-output             Save output images with detections
+```
 
-### 5.3 Evaluating the Fine-tuned Model
+## Fine-tuning on Custom Data
+
+To fine-tune DynamicCompactDetect on your custom dataset:
 
 ```bash
-python scripts/test_dynamiccompactdetect_inference.py \
-  --model results/finetuned/weights/best.pt \
-  --data data/test_images \
-  --output results/finetuned_test
+python scripts/finetune_dynamiccompactdetect_v8.py --data path/to/your/dataset.yaml --epochs 50
 ```
 
-## 6. Research Paper Data Generation
+### Dataset Preparation
 
-The paper data generation script creates comprehensive data for research papers.
+1. Organize your dataset in YOLO format:
+   ```
+   dataset/
+   ├── train/
+   │   ├── images/
+   │   │   ├── img1.jpg
+   │   │   └── ...
+   │   └── labels/
+   │       ├── img1.txt
+   │       └── ...
+   ├── val/
+   │   ├── images/
+   │   │   ├── img_val1.jpg
+   │   │   └── ...
+   │   └── labels/
+   │       ├── img_val1.txt
+   │       └── ...
+   └── data.yaml
+   ```
 
-### 6.1 Generate Paper Data
+2. Create a YAML file (`data.yaml`) with dataset configuration:
+   ```yaml
+   path: ./dataset  # Root directory
+   train: train/images  # Train images relative to path
+   val: val/images  # Validation images relative to path
+
+   # Class names
+   names:
+     0: person
+     1: car
+     # Add your classes here
+   ```
+
+### Command-line Arguments
+
+```
+--data DATA               Path to dataset YAML file
+--epochs EPOCHS           Number of training epochs (default: 100)
+--batch-size BATCH_SIZE   Batch size for training (default: 16)
+--img IMG                 Input image size (default: 640)
+--device DEVICE           Device for training ('cpu', '0', '0,1,2,3', etc.) (default: GPU if available)
+--weights WEIGHTS         Initial weights path (default: models/dynamiccompactdetect_finetuned.pt)
+--name NAME               Experiment name (default: finetune_dcd)
+```
+
+### Training Monitoring
+
+The script creates a `runs/` directory with training logs, which you can monitor using TensorBoard:
+
+```bash
+# Install TensorBoard if not already installed
+pip install tensorboard
+
+# Launch TensorBoard
+tensorboard --logdir runs/
+```
+
+## Generating Research Paper Data
+
+To generate data and figures for the research paper:
 
 ```bash
 python scripts/generate_paper_data.py
@@ -199,132 +243,69 @@ python scripts/generate_paper_data.py
 
 This script:
 1. Runs comprehensive benchmarks on both models
-2. Generates all figures and tables needed for the paper
-3. Creates ablation study results
-4. Saves all data to `results/research_paper/`
+2. Generates tables and figures for the research paper
+3. Saves results to `results/research_paper/`
 
-**Expected Output:**
-- Tables and figures in appropriate formats
-- Comprehensive benchmark data
-- Ablation study results
+### Command-line Arguments
 
-## 7. End-to-End Pipeline
-
-The pipeline script automates the entire workflow from benchmarking to report generation.
-
-### 7.1 Run Complete Pipeline
-
-**macOS/Linux:**
-```bash
-./run_dcd_pipeline.sh
+```
+--output-dir OUTPUT_DIR   Output directory for benchmark results (default: results)
 ```
 
-**Windows:**
+## Running the Complete Pipeline
+
+For a complete end-to-end run of all components:
+
 ```bash
-powershell -ExecutionPolicy Bypass -File run_dcd_pipeline.ps1
+# Unix-like systems (macOS/Linux)
+./run_dcd_pipeline.sh
+
+# Windows (PowerShell)
+./run_dcd_pipeline.ps1
 ```
 
 This script:
 1. Checks for required files and directories
 2. Downloads test images if needed
 3. Runs model comparison tests
-4. Generates comparison visualizations and performance charts
-5. Generates the comparison report
-6. Optionally generates research paper data
+4. Generates benchmark data
+5. Creates visualization and comparison reports
+6. Outputs a comprehensive report to `results/` directory
 
-### 7.2 Pipeline Options
+## Troubleshooting
 
-```
-Usage: ./run_dcd_pipeline.sh [options]
+### Common Issues
 
-Options:
-  -h, --help             Show this help message
-  -c, --compare-only     Only run model comparison (skip fine-tuning)
-  -o, --output-dir DIR   Set custom output directory (default: results)
-  -r, --runs N           Number of inference runs per image (default: 3)
-  -p, --paper            Generate research paper data
-```
+1. **ModuleNotFoundError: No module named 'ultralytics'**
+   - Solution: Make sure you've installed all dependencies with `pip install -r requirements.txt`
 
-## 8. Custom Integration
+2. **CUDA out of memory**
+   - Solution: Reduce batch size with `--batch-size 4` or use CPU with `--device cpu`
 
-### 8.1 Basic Inference in Python
+3. **No such file or directory: 'models/dynamiccompactdetect_finetuned.pt'**
+   - Solution: Run comparison scripts which will download the model automatically or manually download it
 
-```python
-from ultralytics import YOLO
+4. **File 'data/test_images/bus.jpg' not found**
+   - Solution: Create the data directory and download test images:
+     ```bash
+     mkdir -p data/test_images
+     wget https://github.com/ultralytics/assets/raw/main/bus.jpg -O data/test_images/bus.jpg
+     wget https://github.com/ultralytics/assets/raw/main/zidane.jpg -O data/test_images/zidane.jpg
+     ```
 
-# Load the model
-model = YOLO('models/dynamiccompactdetect_finetuned.pt')
+5. **Different benchmark results than in the paper**
+   - Solution: Hardware variations can impact benchmark results. Use `--edge-device` for consistent results
 
-# Run inference
-results = model('path/to/image.jpg')
+### Getting Help
 
-# Process results
-for r in results:
-    print(f"Detected {len(r.boxes)} objects")
-    
-    # Access individual detections
-    for box in r.boxes:
-        x1, y1, x2, y2 = box.xyxy[0]  # Get box coordinates
-        conf = box.conf[0]            # Get confidence score
-        cls = int(box.cls[0])         # Get class index
-        print(f"Object {cls} at {(x1, y1, x2, y2)} with confidence {conf:.2f}")
-```
+If you encounter issues not covered in this guide:
+1. Check the GitHub repository issues section
+2. Consult the Ultralytics YOLOv8 documentation for model-specific issues
+3. Ensure you're using compatible hardware and software versions
 
-### 8.2 Integration with Frameworks
+## Additional Resources
 
-DynamicCompactDetect can be integrated with any framework that supports YOLO models, including:
-- OpenCV
-- TensorFlow (via ONNX)
-- PyTorch
-- ONNX Runtime
-
-Example for ONNX conversion:
-```bash
-python -c "from ultralytics import YOLO; YOLO('models/dynamiccompactdetect_finetuned.pt').export(format='onnx')"
-```
-
-## 9. Troubleshooting
-
-### 9.1 Model Not Found
-
-If you encounter model not found errors:
-```
-Check that your models are in the correct location:
-- YOLOv8n: models/yolov8n.pt
-- DynamicCompactDetect: models/dynamiccompactdetect_finetuned.pt
-
-The scripts will attempt to download models automatically if missing.
-```
-
-### 9.2 CUDA Issues
-
-If you encounter CUDA-related errors:
-```
-# Force CPU execution
-export CUDA_VISIBLE_DEVICES=""
-```
-
-### 9.3 Memory Issues
-
-If you encounter memory issues during inference:
-```
-# Reduce batch size
-python scripts/compare_models.py --batch-size 1
-
-# Use smaller image size
-python scripts/compare_models.py --img-size 320
-```
-
-### 9.4 Missing Dependencies
-
-If you encounter missing dependency errors, ensure you've installed all requirements:
-```bash
-pip install -r requirements.txt
-
-# If specific packages are missing
-pip install ultralytics opencv-python numpy torch
-```
-
-## Conclusion
-
-This guide covers all aspects of using DynamicCompactDetect. For further assistance, refer to the documentation in the `docs/` directory or submit an issue on GitHub. 
+- [YOLOv8 Documentation](https://docs.ultralytics.com/)
+- [PyTorch Documentation](https://pytorch.org/docs/stable/index.html)
+- [Research Paper](docs/research_paper/DynamicCompactDetect_Paper.md)
+- [Model Architecture Details](docs/research_paper/ARCHITECTURE.md) 
