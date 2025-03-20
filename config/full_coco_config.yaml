@@ -1,0 +1,117 @@
+# DynamicCompactDetect Configuration for Full COCO Dataset
+
+# Dataset Configuration
+dataset:
+  name: 'coco'
+  train_images: 'data/coco/images/train2017'
+  val_images: 'data/coco/images/val2017'
+  train_annotations: 'data/coco/annotations/instances_train2017.json'
+  val_annotations: 'data/coco/annotations/instances_val2017.json'
+  num_classes: 80
+
+# Input Configuration
+input:
+  size: [640, 640]
+  channels: 3
+  normalize: true
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+# Model Configuration
+model:
+  name: 'dynamic_compact_detect'
+  backbone: 'cspresnet50'  # cspresnet50, regnet_x_400mf, mobilenetv3_small
+  neck: 'fpn'  # fpn or pan
+  pretrained: true
+  freeze_backbone: false
+  activation: 'silu'  # relu, leaky_relu, silu, mish
+  num_exit_points: 3
+  exit_thresholds: [0.5, 0.7, 0.9]  # Thresholds for early exits
+  exit_layers: ['layer1', 'layer2', 'layer3']
+  input_size: [640, 640]  # Match input configuration
+  num_classes: 80  # Number of classes in COCO dataset
+  base_channels: 32  # Base number of channels for the model
+  
+# Training Configuration
+training:
+  batch_size: 16
+  num_workers: 4
+  epochs: 100
+  optimizer: 'adamw'  # sgd, adam, adamw
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  momentum: 0.937  # Only for SGD
+  clip_gradients: 4.0
+  warmup_epochs: 3
+  warmup_lr_init: 0.0001
+  warmup_momentum: 0.8  # Only for SGD
+  lr_scheduler: 'cosine'  # step, multistep, cosine
+  lr_decay_steps: [60, 80]  # Only for step and multistep
+  lr_decay_factor: 0.1  # Only for step and multistep
+  dynamic_routing_schedule_start: 0.1  # When to start enforcing dynamic routing
+  
+# Augmentations
+augmentation:
+  hsv_h: 0.015  # HSV-Hue augmentation
+  hsv_s: 0.7    # HSV-Saturation augmentation
+  hsv_v: 0.4    # HSV-Value augmentation
+  flip_lr: 0.5  # Horizontal flip probability
+  mosaic_prob: 0.0   # Mosaic augmentation probability
+  mixup_prob: 0.0    # Mixup augmentation probability
+  use_cutout: false  # Whether to use cutout augmentation
+  use_solarize: false  # Whether to use solarize augmentation
+  
+# Loss Configuration
+loss:
+  box_loss_weight: 0.05
+  obj_loss_weight: 1.0
+  cls_loss_weight: 0.5
+  exit_loss_weights: [0.5, 0.75, 1.0]  # Early exit loss weights
+  iou_loss_type: 'ciou'  # iou, giou, diou, ciou
+  
+# Detection Settings
+detection:
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  max_detections: 300
+  
+# Evaluation Settings
+evaluation:
+  iou_thres: 0.5
+  conf_thres: 0.001
+  nms_thres: 0.6
+  
+# Validation Settings
+validation:
+  batch_size: 8
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  frequency: 1  # Validate every N epochs
+  
+# Checkpointing
+checkpointing:
+  save_dir: 'checkpoints/full_coco'
+  save_every: 10
+  save_best: true
+  metric: 'map'  # Metric to track for best model (map or loss)
+  
+# Early Stopping
+early_stopping:
+  enabled: true
+  patience: 10
+  min_delta: 0.001
+  mode: 'max'  # 'min' for loss, 'max' for map
+  
+# Logging
+logging:
+  tensorboard: true
+  log_dir: 'logs/full_coco'
+  log_interval: 10  # Log training stats every N batches
+
+# Hardware Configuration
+hardware:
+  gpu_ids: [0]  # List of GPU IDs to use
+  num_workers: 4  # Number of workers for data loading
+  pinned_memory: true  # Use pinned memory for data loading
+  distributed: false  # Use distributed training
+  sync_bn: false  # Use synchronized batch normalization 

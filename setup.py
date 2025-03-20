@@ -1,66 +1,43 @@
 from setuptools import setup, find_packages
 
-# Get the version from the package without importing it
-with open('src/dynamiccompactdetect/__init__.py', 'r') as f:
-    for line in f:
-        if line.startswith('__version__'):
-            version = line.split('=')[1].strip().strip('"\'')
-            break
-
-# Read the long description from README.md
-with open('README.md', 'r', encoding='utf-8') as f:
-    long_description = f.read()
-
 setup(
     name="dynamiccompactdetect",
-    version=version,
-    author="Abhilash Chadhar, Divya Athya",
-    author_email="abhilashchadhar@example.com",
-    description="A lightweight object detection model for edge devices",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/future-mind/dynamiccompactdetect",
-    project_urls={
-        "Bug Tracker": "https://github.com/future-mind/dynamiccompactdetect/issues",
-        "Documentation": "https://github.com/future-mind/dynamiccompactdetect/docs",
-        "Source Code": "https://github.com/future-mind/dynamiccompactdetect",
+    version="0.1.0",
+    description="A novel dynamic compact detection model for object detection",
+    author="Author",
+    author_email="author@example.com",
+    url="https://github.com/yourusername/DynamicCompactDetect",
+    packages=find_packages(),
+    install_requires=[
+        "torch>=2.0.0",
+        "torchvision>=0.15.0",
+        "numpy>=1.20.0",
+        "opencv-python>=4.5.0",
+        "pyyaml>=6.0",
+        "matplotlib>=3.5.0",
+        "pycocotools>=2.0.5",
+        "tqdm>=4.60.0",
+        "tensorboard>=2.10.0",
+        "pillow>=9.0.0",
+        "albumentations>=1.3.0",
+    ],
+    extras_require={
+        "dev": [
+            "pytest>=7.0.0",
+            "flake8>=5.0.0",
+            "black>=22.0.0",
+            "isort>=5.10.0",
+        ],
     },
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    python_requires=">=3.8",
     classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
     ],
-    python_requires=">=3.8",
-    install_requires=[
-        "torch>=1.8.0",
-        "torchvision>=0.9.0",
-        "opencv-python>=4.5.0",
-        "numpy>=1.20.0",
-        "pillow>=8.0.0",
-        "pyyaml>=5.4.0",
-        "ultralytics>=8.0.0",
-    ],
-    extras_require={
-        "dev": [
-            "pytest>=6.0",
-            "black>=21.5b2",
-            "isort>=5.9.0",
-            "flake8>=3.9.0",
-            "mkdocs>=1.1.0",
-            "mkdocs-material>=7.0.0",
-        ],
-    },
-    entry_points={
-        "console_scripts": [
-            "dcd=dynamiccompactdetect.cli:main",
-        ],
-    },
 ) 

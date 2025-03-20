@@ -47,127 +47,54 @@ coverage.xml
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Virtual environments
-venv/
-env/
-ENV/
-.env/
-.venv/
-
-# IDE/Editor files
+# PyCharm
 .idea/
+*.iml
+
+# VS Code
 .vscode/
-*.swp
-*.swo
-.DS_Store
-.project
-.pydevproject
-.settings/
+
+# Environment directories
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # Project specific
-runs/
-**/old-*
-results/final/
-weights/*.pt
-!weights/.gitkeep
-
-# Large model files and datasets
-*.pt
-!models/
-
-# Allow specific model files that need to be in version control
-!models/dynamiccompactdetect_finetuned.pt
-
-# Operating System Files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Model weights and checkpoints
+*.weights
 *.pt
 *.pth
 *.onnx
-*.weights
-*.engine
-*.trt
 *.tflite
-*.pb
-*.h5
-*.hdf5
-*.ckpt
-*.safetensors
-weights/
+*.trt
+*.engine
 
-# Datasets
-data/
-datasets/
-*.zip
-*.tar
-*.gz
-*.bz2
-*.xz
-*.7z
+# Training & Evaluation artifacts
+runs/
+results/
+checkpoints/
+
+# Dataset files
 *.jpg
 *.jpeg
 *.png
 *.bmp
 *.tif
 *.tiff
-*.webp
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.bin
-*.npy
-*.npz
-
-# Training outputs
-results/
-logs/
-*.log
-*.csv
-*.json
-*.yaml
-*.yml
-events.out.tfevents.*
-
-# IDE specific
-*.swp
-*.swo
-*~
-
-# Symlinks for datasets
-train2017.txt
-val2017.txt
-train2017_filtered.txt
-val2017_filtered.txt
-
-# Specific to this project
-dynamiccompactdetect.pt
-yolov*.pt
-
-# Keep these files
+*.txt
 !requirements.txt
-!setup.py
-!data/hyp.yaml
-!data/hyp_v11.yaml
-!data/coco8.yaml
-!data/coco.yaml
-!.gitkeep
-!*/
-!*/.gitkeep
-!*/*/
-!*/*/.gitkeep
-!*/*/*/
-!*/*/*/.gitkeep
+!requirements-dev.txt
 
-# Allow benchmark and report files
-!results/benchmarks/
-!results/benchmarks/*.json
-!results/comparisons/
-!results/comparisons/*.md 
+# Generated figures
+docs/figures/*.png
+docs/figures/*.jpg
+docs/figures/*.pdf
+
+# Mac specific
+.DS_Store
+
+# Windows specific
+Thumbs.db 
